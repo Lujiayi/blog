@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  
+  <title>解决Angular Kendo UI 导出PDF中文乱码 | 布.</title>
+  <meta name="google-site-verification" content="" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta itemprop="name" content="布." />
+  <meta itemprop="description" content="漫长岁月" />
+  <meta itemprop="image" content="" />
+  <link rel="shortcut icon" href="" type="image/x-icon">
+  <!-- keywords and description -->
+  
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <script src="//cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js"></script>
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+<body>
+  <div id="container">
+    <header>
+  <div class="site-title">
+    <a href="/">
+      布.
+    </a>
+  </div>
+  
+  <div class="site-subtitle">
+    漫长岁月
+  </div>
+  
+  
+  <p class="links">
+    
+    <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_29485177">
+      <img src="/images/links/link.png" alt="CSDN">
+    </a>
+    
+  </p>
+  
+</header>
+    <div id="main">
+      <article class="post">
+  <h3 class="date">
+  <time datetime="2018-07-02T11:33:30.000Z">
+    Jul 2, 2018
+  </time>
+</h3>
+  <h1>解决Angular Kendo UI 导出PDF中文乱码</h1>
+  <p class="post-info">
+  
+  
+</p>
+  
+  
+  <article>
+    <p>在使用 <a target="_blank" rel="noopener" href="https://www.telerik.com/kendo-angular-ui/">Kendo UI for Angular</a> 的 <a target="_blank" rel="noopener" href="https://www.telerik.com/kendo-angular-ui/components/pdfexport/api/PDFExportComponent/">PDFExportComponent</a> 组件时，如果内容是中文则导出PDF将会出现乱码，网上许多人认为是官方不支持中文，但其实不然，阅读文档</p>
+<p><strong>The PDF Export component supports the Unicode standard only if the fonts you provide contain glyphs for the referenced Unicode characters</strong></p>
+<p>发现导致乱码的问题是该组件只支持Unicode标准的字体，官方默认字体是 DejaVu Sans，这字体一看就不是好东西，胆敢不支持中文语言。找到乱码的原因了，那接下来就是换了这个字体，官方提供了两种方式：</p>
+<ul>
+<li>@font-face 指定</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://ufonts.com/download/microsoft-yahei/181072.html">Microsoft Yahei 字体下载</a>，下载完成后将.ttf文件存放在项目下，然后在@font-face 下的 src 指定到该文件，如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@font-face &#123;</span><br><span class="line">  font-family: &#x27;DejaVu Sans&#x27;;</span><br><span class="line">  src: url(&#x27;../../Microsoft Yahei.ttf&#x27;) format(&#x27;truetype&#x27;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>defineFont 方法(推荐)</li>
+</ul>
+<p>同样下载 <a target="_blank" rel="noopener" href="https://ufonts.com/download/microsoft-yahei/181072.html">Microsoft Yahei 字体</a>，设置如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">import &#123; defineFont &#125; from &#x27;@progress/kendo-drawing/pdf&#x27;;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">@ViewChild(&#x27;pdf&#x27;) pdf: PDFExportComponent;</span><br><span class="line"></span><br><span class="line">public print(): void &#123;</span><br><span class="line">    ...</span><br><span class="line">    defineFont(&#123;</span><br><span class="line">        &#x27;Microsoft Yahei&#x27;: &#x27;../../Microsoft Yahei.ttf&#x27;</span><br><span class="line">    &#125;);//也可以在 ngInit() 中设置</span><br><span class="line">    </span><br><span class="line">    this.pdf.saveAs(&#x27;example.pdf&#x27;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>OK，可以愉快的导出中文了~</p>
+
+  </article>
+  
+</article>
+
+
+    </div>
+  </div>
+  <footer>
+  
+  
+  <p>
+    Powered by <a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/syy11cn/hexo-theme-linear">Linear</a> from <a target="_blank" rel="noopener" href="https://syy11.cn">Yiyang Sun</a>
+  </p>
+</footer>
+  
+  <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+  </script>
+  <script>
+    Waline({
+      el: '#waline',
+      placeholder: '',
+      avatar: 'retro',
+      visitor: true,
+      requiredFields: ['nick', 'mail'],
+      serverURL: '',
+      emoji: [
+        'https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/bilibili',
+        'https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/qq',
+        'https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/alus',
+        'https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/tw-emoji',
+        'https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/weibo',
+        'https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/tieba',
+      ]
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  
+  <title>Seven-Flow一个用于OA工作流程图设计的轻量级 javascript 插件 | 布.</title>
+  <meta name="google-site-verification" content="" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta itemprop="name" content="布." />
+  <meta itemprop="description" content="漫长岁月" />
+  <meta itemprop="image" content="" />
+  <link rel="shortcut icon" href="" type="image/x-icon">
+  <!-- keywords and description -->
+  
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  <script src="//cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js"></script>
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+<body>
+  <div id="container">
+    <header>
+  <div class="site-title">
+    <a href="/">
+      布.
+    </a>
+  </div>
+  
+  <div class="site-subtitle">
+    漫长岁月
+  </div>
+  
+  
+  <p class="links">
+    
+    <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_29485177">
+      <img src="/images/links/link.png" alt="CSDN">
+    </a>
+    
+  </p>
+  
+</header>
+    <div id="main">
+      <article class="post">
+  <h3 class="date">
+  <time datetime="2019-06-04T10:47:25.000Z">
+    Jun 4, 2019
+  </time>
+</h3>
+  <h1>Seven-Flow一个用于OA工作流程图设计的轻量级 javascript 插件</h1>
+  <p class="post-info">
+  
+  
+</p>
+  
+  
+  <article>
+    <h1 id="Seven-Flow"><a href="#Seven-Flow" class="headerlink" title="Seven-Flow"></a>Seven-Flow</h1><p>Seven-Flow 是一个轻量级的 javascript 流程设计器，可用于OA工作流程图设计等</p>
+<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><blockquote>
+<p><strong>基本</strong></p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/20190604164919823.gif" alt="在这里插入图片描述"></p>
+<blockquote>
+<p><strong>编辑节点</strong></p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/2019060416494491.gif" alt="在这里插入图片描述"></p>
+<blockquote>
+<p><strong>编辑线段</strong></p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/20190604165029257.gif" alt="在这里插入图片描述"></p>
+<h3 id="安装使用"><a href="#安装使用" class="headerlink" title="安装使用"></a>安装使用</h3><p>下载 <a target="_blank" rel="noopener" href="https://gitee.com/lujiayi/seven-flow/releases/v1.0">Seven-Flow</a></p>
+<p>引入seven-flow</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;link rel=&quot;stylesheet&quot; href=&quot;seven-flow.css&quot;&gt;</span><br><span class="line">&lt;script src=&quot;seven-flow.js&quot;&gt;&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>容器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;div id=&quot;seven_flow&quot;&gt;&lt;/div&gt;</span><br></pre></td></tr></table></figure>
+<p>配置并初始化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">var options = &#123;</span><br><span class="line">    page: &#123;</span><br><span class="line">        width: 1000,    // 画布宽度</span><br><span class="line">        height: 600     // 画布高度    </span><br><span class="line">    &#125;,</span><br><span class="line">    node: &#123;     // 节点配置</span><br><span class="line">       	//  width: 120,     默认120</span><br><span class="line">        //  height: 60,     默认60</span><br><span class="line">        onConnect: (node) =&gt; &#123;&#125;,    // 点击连接触发</span><br><span class="line">        onSetting: (node) =&gt; &#123;&#125;,    // 点击设置触发</span><br><span class="line">        onClose: (node) =&gt; &#123;&#125;       // 点击删除触发</span><br><span class="line">    &#125;,</span><br><span class="line">    path: &#123;     // 线段配置</span><br><span class="line">        // stroke: &#x27;#888&#x27;,     线段颜色</span><br><span class="line">        onSetting: (path) =&gt; &#123;&#125;     // 点击设置触发</span><br><span class="line">    &#125;,</span><br><span class="line">    tools: &#123;    // 工具栏配置</span><br><span class="line">        saveFn: (e) =&gt; &#123;&#125;,          // 点击确定触发</span><br><span class="line">    &#125;,</span><br><span class="line">    imgPath: &#x27;./assets/images/&#x27;     // 图片资源路径</span><br><span class="line">    editable: true		 // 是否可编辑</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">window.onload = () =&gt; sf.init(&#x27;seven_flow&#x27;, options);</span><br></pre></td></tr></table></figure>
+<p>数据回显</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">var data = &#123;</span><br><span class="line">    nodes: [...,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;id&quot;:&quot;d152a250-869a-11e9-a15a-57fd9076db4e&quot;,</span><br><span class="line">            &quot;name&quot;:&quot;节点&quot;,</span><br><span class="line">            &quot;type&quot;:&quot;node&quot;,</span><br><span class="line">            &quot;attr&quot;:&#123;...&#125;,</span><br><span class="line">            &quot;x&quot;:394,</span><br><span class="line">            &quot;y&quot;:49,</span><br><span class="line">            &quot;width&quot;:120,</span><br><span class="line">            &quot;height&quot;:60</span><br><span class="line">        &#125;</span><br><span class="line">    ],</span><br><span class="line">    path: [...,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;id&quot;:&quot;fad046f0-869a-11e9-a15a-57fd9076db4e&quot;,</span><br><span class="line">            &quot;name&quot;:&quot;开始-节点&quot;,</span><br><span class="line">            &quot;type&quot;:&quot;path&quot;,</span><br><span class="line">            &quot;from&quot;:&quot;d1134f60-869a-11e9-a15a-57fd9076db4e&quot;,</span><br><span class="line">            &quot;to&quot;:&quot;d152a250-869a-11e9-a15a-57fd9076db4e&quot;,</span><br><span class="line">            &quot;reverse&quot;:&quot;0&quot;,</span><br><span class="line">            &quot;lineType&quot;:&quot;solid&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line">sf.recover(data);</span><br></pre></td></tr></table></figure>
+
+  </article>
+  
+</article>
+
+
+    </div>
+  </div>
+  <footer>
+  
+  
+  <p>
+    Powered by <a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/syy11cn/hexo-theme-linear">Linear</a> from <a target="_blank" rel="noopener" href="https://syy11.cn">Yiyang Sun</a>
+  </p>
+</footer>
+  
+  <script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+  </script>
+  <script>
+    Waline({
+      el: '#waline',
+      placeholder: '',
+      avatar: 'retro',
+      visitor: true,
+      requiredFields: ['nick', 'mail'],
+      serverURL: '',
+      emoji: [
+        'https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/bilibili',
+        'https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/qq',
+        'https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/alus',
+        'https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/tw-emoji',
+        'https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/weibo',
+        'https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/tieba',
+      ]
+    });
+  </script>
+</body>
+
+</html>

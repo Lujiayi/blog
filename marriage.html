@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>陆佳毅 🧡 陆英</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="https://cdn.bootcdn.net/ajax/libs/video.js/7.18.0/alt/video-js-cdn.min.css" rel="stylesheet">
+</head>
+<body style="padding: 0px;margin: 0px;background: black;">
+<div style="display: flex;justify-content: center;align-items: center;height: 100vh;">
+    <video id="my-video" class="video-js vjs-big-play-centered vjs-fluid" controls preload="auto">
+        <source src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-92d206c7-6f63-4ceb-bd0f-1176ca8380cd/fc99a5a3-a1c0-460d-afcd-d8fff28bca0b.mp4" type="video/mp4" />
+    </video>
+</div>
+</body>
+<script src="https://cdn.bootcdn.net/ajax/libs/video.js/7.18.0/alt/video.core.min.js"></script>
+<script type="text/javascript">
+    var player = videojs('#my-video', { fluid: true }, function () {
+        console.log('Good to go!');
+        // this.play(); // if you don't trust autoplay for some reason
+    })
+</script>
+</html>
