@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+
+
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <meta name="author" content="Lujiayi">
+
+
+  <meta name="subtitle" content="漫长岁月">
+
+
+
+
+<title>lucene6.6.0学习心得 | 布</title>
+
+
+
+<link rel="icon" href="/blog/favicon.ico">
+
+
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/nprogress/nprogress.css">
+
+
+
+<script src="/blog/lib/jquery.min.js"></script>
+
+
+<script src="/blog/lib/iconify-icon.min.js"></script>
+
+
+<script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+  };
+</script>
+
+
+<script src="/blog/lib/nprogress/nprogress.js"></script>
+
+<script>
+  $(document).ready(() => {
+    NProgress.configure({
+      showSpinner: false,
+    });
+    NProgress.start();
+    $("#nprogress .bar").css({
+      background: "#de7441",
+    });
+    $("#nprogress .peg").css({
+      "box-shadow": "0 0 2px #de7441, 0 0 4px #de7441",
+    });
+    $("#nprogress .spinner-icon").css({
+      "border-top-color": "#de7441",
+      "border-left-color": "#de7441",
+    });
+    setTimeout(function () {
+      NProgress.done();
+      $(".fade").removeClass("out");
+    }, 800);
+  });
+</script>
+
+<script>
+  (function () {
+    const prefersDark =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const setting = localStorage.getItem("hexo-color-scheme") || "auto";
+    if (setting === "dark" || (prefersDark && setting !== "light"))
+      document.documentElement.classList.toggle("dark", true);
+    let isDark = document.documentElement.classList.contains("dark");
+  })();
+
+  $(document).ready(function () {
+    // init icon
+    const prefersDark =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const isDark = document.documentElement.classList.contains("dark");
+    $("#theme-icon").attr("icon", isDark ? "ri:moon-line" : "ri:sun-line");
+
+    function toggleGiscusTheme() {
+      const isDark = document.documentElement.classList.contains("dark");
+      const giscusFrame = document.querySelector("iframe.giscus-frame");
+      if (giscusFrame) {
+        giscusFrame.contentWindow.postMessage(
+          {
+            giscus: {
+              setConfig: {
+                theme: isDark ? "dark" : "light",
+              },
+            },
+          },
+          "https://giscus.app"
+        );
+      }
+    }
+
+    // toggle dark mode
+    function toggleDark() {
+      let isDark = document.documentElement.classList.contains("dark");
+      const setting = localStorage.getItem("hexo-color-scheme") || "auto";
+      isDark = !isDark;
+      document.documentElement.classList.toggle("dark", isDark);
+      $("#theme-icon").attr("icon", isDark ? "ri:moon-line" : "ri:sun-line");
+      if (prefersDark === isDark) {
+        localStorage.setItem("hexo-color-scheme", "auto");
+      } else {
+        localStorage.setItem("hexo-color-scheme", isDark ? "dark" : "light");
+      }
+      toggleGiscusTheme();
+    }
+
+    // listen dark mode change
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        const setting = localStorage.getItem("hexo-color-scheme") || "auto";
+        if (setting === "auto") {
+          document.documentElement.classList.toggle("dark", e.matches);
+          $("#theme-icon").attr(
+            "icon",
+            e.matches ? "ri:moon-line" : "ri:sun-line"
+          );
+          toggleGiscusTheme();
+        }
+      });
+
+    $("#toggle-dark").click((event) => {
+      const isAppearanceTransition = document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      if (!isAppearanceTransition) {
+        toggleDark()
+        return
+      }
+      const x = event.clientX
+      const y = event.clientY
+      const endRadius = Math.hypot(
+        Math.max(x, innerWidth - x),
+        Math.max(y, innerHeight - y),
+      )
+      const transition = document.startViewTransition(async () => {
+        toggleDark()
+      })
+
+      transition.ready
+        .then(() => {
+          const isDark = document.documentElement.classList.contains("dark")
+          const clipPath = [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`,
+          ]
+          document.documentElement.animate(
+            {
+              clipPath: isDark
+                ? [...clipPath].reverse()
+                : clipPath,
+            },
+            {
+              duration: 400,
+              easing: 'ease-out',
+              pseudoElement: isDark
+                ? '::view-transition-old(root)'
+                : '::view-transition-new(root)',
+            },
+          )
+        })
+    });
+  });
+</script>
+
+
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<body class="font-sans bg-white dark:bg-zinc-900 text-gray-700 dark:text-gray-200 relative">
+  <header class="fixed w-full px-5 py-1 z-10 backdrop-blur-xl backdrop-saturate-150 border-b border-black/5">
+  <div class="max-auto">
+    <nav class="flex items-center text-base">
+      <a href="/blog/" class="group">
+        <h2 class="font-medium tracking-tighterp text-l p-2">
+          <img class="w-5 mr-2 inline-block transition-transform group-hover:rotate-[30deg]" id="logo" src="favicon.ico" alt="布" />
+          布
+        </h2>
+      </a>
+      <div id="header-title" class="opacity-0 md:ml-2 md:mt-[0.1rem] text-xs font-medium whitespace-nowrap overflow-hidden overflow-ellipsis">
+        lucene6.6.0学习心得
+      </div>
+      <div class="flex-1"></div>
+      <div class="flex items-center gap-3">
+        
+          <a class="hidden sm:flex" href="/blog/archives">Posts</a>
+        
+        
+          
+            <a class="w-5 h-5 hidden sm:flex" title="Github" target="_blank" rel="noopener" href="https://github.com/Lujiayi">
+              <iconify-icon width="20" icon="ri:github-line"></iconify-icon>
+            </a>
+          
+        
+        <a class="w-5 h-5 hidden sm:flex" title="Github" href="rss2.xml">
+          <iconify-icon width="20" icon="ri:rss-line"></iconify-icon>
+        </a>
+        <a class="w-5 h-5" title="toggle theme" id="toggle-dark">
+          <iconify-icon width="20" icon="" id="theme-icon"></iconify-icon>
+        </a>
+      </div>
+      <div class="flex items-center justify-center gap-3 ml-3 sm:hidden">
+        <span class="w-5 h-5" aria-hidden="true" role="img" id="open-menu">
+          <iconify-icon width="20" icon="carbon:menu" ></iconify-icon>
+        </span>
+        <span class="w-5 h-5 hidden" aria-hidden="true" role="img" id="close-menu">
+          <iconify-icon  width="20" icon="carbon:close" ></iconify-icon>
+        </span>
+      </div>
+    </nav>
+  </div>
+</header>
+<div id="menu-panel" class="h-0 overflow-hidden sm:hidden fixed left-0 right-0 top-12 bottom-0 z-10">
+  <div id="menu-content" class="relative z-20 bg-white/80 px-6 sm:px-8 py-2 backdrop-blur-xl -translate-y-full transition-transform duration-300">
+    <ul class="nav flex flex-col sm:flex-row text-sm font-medium">
+      
+        <li class="nav-portfolio sm:mx-2 border-b sm:border-0 border-black/5 last:border-0 hover:text-main">
+          <a href="/blog/archives" class="flex h-12 sm:h-auto items-center">Posts</a>
+        </li>
+      
+    </ul>
+  </div>
+  <div class="mask bg-black/20 absolute inset-0"></div>
+</div>
+
+  <main class="pt-14">
+    <!-- css -->
+
+<link rel="stylesheet" href="/blog/lib/fancybox/fancybox.min.css">
+
+
+<link rel="stylesheet" href="/blog/lib/tocbot/tocbot.min.css">
+
+<!-- toc -->
+
+  <!-- tocbot -->
+<nav class="post-toc toc text-sm w-48 relative top-32 right-0 opacity-70 hidden lg:block" style="position: fixed !important;"></nav>
+
+
+<section class="px-6 max-w-prose mx-auto md:px-0">
+  <!-- header -->
+  <header class="overflow-hidden pt-6 pb-6 md:pt-12">
+    <div class="pt-4 md:pt-6">
+      <h1 id="article-title" class="text-[2rem] font-bold leading-snug mb-4 md:mb-6 md:text-[2.6rem]">
+        lucene6.6.0学习心得
+      </h1>
+      <div>
+        <section class="flex items-center gap-3 text-sm">
+          <span class="flex items-center gap-1">
+            <iconify-icon width="18" icon="carbon-calendar" ></iconify-icon>
+            <time>2025-03-04</time>
+          </span>
+          <span class="text-gray-400">·</span>
+          <span class="flex items-center gap-1">
+            <iconify-icon width="18" icon="ic:round-access-alarm" ></iconify-icon>
+            <span>6 min</span>
+          </span>
+          <span class="text-gray-400">·</span>
+          <span class="flex items-center gap-1">
+            <iconify-icon width="18" icon="icon-park-outline:font-search" ></iconify-icon>
+            <span>1.4k words</span>
+          </span>
+          
+        </section>
+      </div>
+    </div>
+  </header>
+  <!-- content -->
+  <article class="post-content prose m-auto slide-enter-content dark:prose-invert">
+    <h2 id="lucene是什么？"><a href="#lucene是什么？" class="headerlink" title="lucene是什么？"></a>lucene是什么？</h2><p>官方网站：使用Java语言编写的高性能全文检索工程。适合任何需要全文检索的应用，特别是跨平台的。<br>本菜鸟：空间换速度，查的快，毫秒级查询，秒杀like！</p>
+<h2 id="导入依赖"><a href="#导入依赖" class="headerlink" title="导入依赖"></a>导入依赖</h2><pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.lucene&lt;/groupId&gt;
+    &lt;artifactId&gt;lucene-core&lt;/artifactId&gt;
+    &lt;version&gt;6.6.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.lucene&lt;/groupId&gt;
+    &lt;artifactId&gt;lucene-analyzers-common&lt;/artifactId&gt;
+    &lt;version&gt;6.6.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.lucene&lt;/groupId&gt;
+    &lt;artifactId&gt;lucene-analyzers-smartcn&lt;/artifactId&gt;
+    &lt;version&gt;6.6.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.lucene&lt;/groupId&gt;
+    &lt;artifactId&gt;lucene-queryparser&lt;/artifactId&gt;
+    &lt;version&gt;6.6.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.lucene&lt;/groupId&gt;
+    &lt;artifactId&gt;lucene-highlighter&lt;/artifactId&gt;
+    &lt;version&gt;6.6.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.lucene&lt;/groupId&gt;
+    &lt;artifactId&gt;lucene-memory&lt;/artifactId&gt;
+    &lt;version&gt;6.6.0&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h2 id="创建索引"><a href="#创建索引" class="headerlink" title="创建索引"></a>创建索引</h2><p>lucene将需要进行检索的内容经过指定的分词器（Analyzer）分词后存为索引（一般存在文件系统FSDirectory，也可以是内存RAMDirectory）。</p>
+<pre><code>String indexPath = &quot;D:/index&quot;; 
+//得到索引存放目录对象
+Directory dir = FSDirectory.open(Paths.get(indexPath, new String[0]));
+//这个是官方的中文分词器，还有其他MMAnalyzer、IkAnalyzer等
+SmartChineseAnalyzer analyzer = new SmartChineseAnalyzer();
+//索引写入类需要的配置类
+IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+//索引写入类
+IndexWriter iw = new IndexWriter(dir, iwc);
+
+//User:&#123;Integer id,String name,String sign&#125;
+List&lt;User&gt; userList = new ArrayList&lt;User&gt;();
+userList.add(new User(1,&quot;老大&quot;,&quot;我是我们家的大哥大！&quot;));
+userList.add(new User(2,&quot;老二&quot;,&quot;我是呆萌的二哈！&quot;));
+userList.add(new User(3,&quot;老三&quot;,&quot;我是专门拆散家庭人人讨厌的小三！&quot;));
+userList.add(new User(4,&quot;老四&quot;,&quot;我是小可爱！&quot;));
+
+for(User user : userList)&#123;
+    //document类似数据库的table
+    Document doc = new Document();
+    //Field类似数据库的column
+    doc.add(new StoredField(&quot;id&quot;,user.getId()));
+    doc.add(new StringField(&quot;name&quot;,user.getName(),Field.store.YES));
+    doc.add(new TextField(&quot;sign&quot;,user.getSign(),Field.store.YES));
+    iw.addDocument(doc);
+&#125;
+
+//创建索引完成，关闭索引写入类
+iw.close();
+</code></pre>
+<h4 id="各种Field类"><a href="#各种Field类" class="headerlink" title="各种Field类"></a>各种Field类</h4><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TextField</td>
+<td>分词并存入索引</td>
+</tr>
+<tr>
+<td>StringField</td>
+<td>逐字的存为索引</td>
+</tr>
+<tr>
+<td>IntPoint</td>
+<td>Int类型存为索引以提供精确&#x2F;范围查询</td>
+</tr>
+<tr>
+<td>LongPoint</td>
+<td>Long类型存为索引以提供精确&#x2F;范围查询</td>
+</tr>
+<tr>
+<td>DoublePoint</td>
+<td>DoublePoint类型存为索引以提供精确&#x2F;范围查询</td>
+</tr>
+<tr>
+<td>SortedDocValuesField</td>
+<td>String类型存为索引以提供排序</td>
+</tr>
+<tr>
+<td>SortedSetDocValuesField</td>
+<td>String类型的set集合存为索引以提供排序</td>
+</tr>
+<tr>
+<td>NumericDocValuesField</td>
+<td>Long类型存为索引以提供排序</td>
+</tr>
+<tr>
+<td>SortedNumericDocValuesField</td>
+<td>Long类型的set集合存为索引以提供排序</td>
+</tr>
+<tr>
+<td>StoredField</td>
+<td>只存储值，不创建索引。注：SortedDocValuesField、SortedSetDocValuesField、NumericDocValuesField、SortedNumericDocValuesField使用时若需要结果中显示排序值，则需要实例化同一个字段的StoredField</td>
+</tr>
+</tbody></table>
+<h2 id="查询索引"><a href="#查询索引" class="headerlink" title="查询索引"></a>查询索引</h2><p>lucene读取索引，根据指定的Query，或者BooleanQuery(多条件)等查询出结果根据得分情况排序。</p>
+<pre><code>//创建索引读取对象
+IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(luceneIndexPath, new String[0])));
+//创建索引查找对象
+IndexSearcher searcher = new IndexSearcher(reader);
+//创建基础查询单元
+Term term = new Term(&quot;sign&quot;,&quot;萌&quot;);
+//创建查询
+TermQuery query = new TermQuery(term);
+//查询 第二个参数代表查询得分高的前3个
+TopDocs search = searcher.search(query, 3);
+//得到命中
+ScoreDoc[] hits = search.scoreDocs;
+if(hits.length &gt; 0)&#123;
+    for(ScoreDoc sd : hits)&#123;
+        Document doc = searcher.doc(sd.doc);
+        System.out.println(&quot;id:&quot;+ doc.get(&quot;id&quot;) +&quot;,name:&quot;+ doc.get(&quot;name&quot;) +&quot;,sign:&quot;+  doc.get(&quot;sign&quot;));
+    &#125;
+&#125;
+</code></pre>
+<h4 id="多条件查询"><a href="#多条件查询" class="headerlink" title="多条件查询"></a>多条件查询</h4><pre><code>//创建官方中文分词器
+SmartChineseAnalyzer analyzer = new SmartChineseAnalyzer();
+//创建一个查询解析器
+QueryParser parser = new QueryParser(&quot;sign&quot;, analyzer);
+//解析传入的查询内容 例如我家 -&gt; sign:我，sign:家，如果只是TermQuery则不进行分析解析sign:我家
+Query query = parser.parse(&quot;我家&quot;);
+//创建BooleanClause
+BooleanClause c1 = new BooleanClause(new TermQuery(new Term(&quot;name&quot;, &quot;大&quot;)), Occur.SHOULD);
+BooleanClause c2 = new BooleanClause(query, Occur.SHOULD);
+//添加查询条件到查询器中
+BooleanQuery booleanQuery = new BooleanQuery.Builder().add(c1).add(c2).build();
+
+TopDocs search = searcher.search(booleanQuery, 3);
+</code></pre>
+<h4 id="Occur类说明"><a href="#Occur类说明" class="headerlink" title="Occur类说明"></a>Occur类说明</h4><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Occur.FILTER</td>
+<td>类似MUST，除非这些条件不参与计分</td>
+</tr>
+<tr>
+<td>Occur.MUST</td>
+<td>条件必须出现在匹配结果中</td>
+</tr>
+<tr>
+<td>Occur.MUST_NOT</td>
+<td>条件必须不出现在匹配结果中</td>
+</tr>
+<tr>
+<td>Occur.SHOULD</td>
+<td>条件应该出现在结果中，但不是必须的</td>
+</tr>
+</tbody></table>
+<h4 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h4><p>如果需要排序，则在创建索引的时候如下设置  </p>
+<pre><code>//存入索引，但是并未存入值
+doc.add(new IntPoint(&quot;sort&quot;, 1));
+//添加排序
+doc.add(new NumericDocValuesField(&quot;sort&quot;, 1));
+//只存储值，不然结果集无法出现
+doc.add(new StoredField(&quot;sort&quot;, 1));  
+</code></pre>
+<p>查询时则  </p>
+<pre><code>//排序的字段为sort，类型为int，false == asc,true == desc
+SortField sortField = new SortField(&quot;sort&quot;, SortField.Type.INT, false);
+Sort sort = new Sort(sortField);
+TopDocs results = searcher.search(query, 3, sort);
+</code></pre>
+<h4 id="高亮显示"><a href="#高亮显示" class="headerlink" title="高亮显示"></a>高亮显示</h4><pre><code>//创建一个高亮类，传入的SimpleHTMLFormatter默认为给匹配处添加&lt;B&gt;&lt;/B&gt;标签，query就是searcher.search(query, 3)中的同一个query
+//另一个构造器Highlighter(&quot;&lt;i&gt;&quot;,&quot;&lt;i/&gt;&quot;);
+Highlighter highlighter = new Highlighter(new SimpleHTMLFormatter(),new QueryScorer(query));
+//设置最多返回多少匹配片段
+highlighter.setTextFragmenter(new SimpleFragmenter(20));
+//得到高亮的串
+String sign = highlighter.getBestFragment(analyzer, &quot;sign&quot;, doc.get(&quot;sign&quot;));
+</code></pre>
+<p>以上是本小菜的学习总结，若有错误，请大佬指教！</p>
+
+  </article>
+  <!-- tag -->
+  <div class="mt-12 pt-6 border-t border-gray-200">
+    
+  </div>
+  <!-- prev and next -->
+  <div class="flex justify-between mt-12 pt-6 border-t border-gray-200">
+    <div>
+      
+        <a href="/blog/2017/11/29/java-websocket%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF-%E8%81%8A%E5%A4%A9%E5%AE%A4/" class="text-sm text-gray-400 hover:text-gray-500 flex justify-center">
+          <iconify-icon width="20" icon="ri:arrow-left-s-line" data-inline="false"></iconify-icon>
+          java-websocket即时通讯-聊天室
+        </a>
+      
+    </div>
+    <div>
+      
+    </div>
+  </div>
+  <!-- comment -->
+  <div class="article-comments mt-12">
+    
+
+  </div>
+</section>
+<!-- js inspect -->
+
+<script src="/blog/lib/clipboard.min.js"></script>
+
+
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": {
+        preferredFont: "TeX",
+        availableFonts: ["STIX","TeX"],
+        linebreaks: { automatic:true },
+        EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50)
+    },
+    tex2jax: {
+        inlineMath: [ ["$", "$"], ["\\(","\\)"] ],
+        processEscapes: true,
+        ignoreClass: "tex2jax_ignore|dno",
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+        equationNumbers: { autoNumber: "AMS" },
+        noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } },
+        Macros: { href: "{}" }
+    },
+    messageStyle: "none"
+  });
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+      for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+      }
+  });
+</script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+  $(document).ready(() => {
+    const maraidConfig = {
+      theme: "default",
+      logLevel: 3,
+      flowchart: { curve: "linear" },
+      gantt: { axisFormat: "%m/%d/%Y" },
+      sequence: { actorMargin: 50 },
+    };
+    mermaid.initialize(maraidConfig);
+  });
+</script>
+
+
+
+<script src="/blog/lib/fancybox/fancybox.umd.min.js"></script>
+
+<script>
+  $(document).ready(() => {
+    $('.post-content').each(function(i){
+      $(this).find('img').each(function(){
+        if ($(this).parent().hasClass('fancybox') || $(this).parent().is('a')) return;
+        var alt = this.alt;
+        if (alt) $(this).after('<span class="fancybox-alt">' + alt + '</span>');
+        $(this).wrap('<a class="fancybox-img" href="' + this.src + '" data-fancybox=\"gallery\" data-caption="' + alt + '"></a>')
+      });
+      $(this).find('.fancybox').each(function(){
+        $(this).attr('rel', 'article' + i);
+      });
+    });
+
+    Fancybox.bind('[data-fancybox="gallery"]', {
+        // options
+    })
+  })
+</script>
+
+<!-- tocbot begin -->
+
+<script src="/blog/lib/tocbot/tocbot.min.js"></script>
+
+<script>
+  $(document).ready(() => {
+      tocbot.init({
+        // Where to render the table of contents.
+        tocSelector: '.post-toc',
+        // Where to grab the headings to build the table of contents.
+        contentSelector: '.post-content',
+        // Which headings to grab inside of the contentSelector element.
+        headingSelector: 'h1, h2, h3',
+        // For headings inside relative or absolute positioned containers within content.
+        hasInnerContainers: true,
+    });
+  })
+</script>
+<!-- tocbot end -->
+
+
+  </main>
+  <footer class="flex flex-col h-40 items-center justify-center text-gray-400 text-sm">
+  <!-- busuanzi -->
+  
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- Busuanzi Analytics -->
+<div class="flex items-center gap-2">
+  <span>Visitors</span>
+  <span id="busuanzi_value_site_uv"></span>
+  <span>Page Views</span>
+  <span id="busuanzi_value_site_pv"></span>
+</div>
+<!-- End Busuanzi Analytics -->
+
+
+  <!-- copyright -->
+  <div class="flex items-center gap-2">
+    <a target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" style="color: inherit;">CC BY-NC-SA 4.0</a>
+    <span>© 2022</span>
+    <iconify-icon width="18" icon="emojione-monotone:maple-leaf" ></iconify-icon>
+    <a href="https://github.com/xbmlz" target="_blank" rel="noopener noreferrer">xbmlz</a>
+  </div>
+  <!-- powered by -->
+  <div class="flex items-center gap-2">
+    <span>Powered by</span>
+    <a href="https://hexo.io/" target="_blank" rel="noopener noreferrer">Hexo</a>
+    <span>&</span>
+    <a href="https://github.com/xbmlz/hexo-theme-maple" target="_blank" rel="noopener noreferrer">Maple</a>
+  </div>
+
+</footer>
+
+  <div class="back-to-top box-border fixed right-6 z-1024 -bottom-20 rounded py-1 px-1 bg-slate-900 opacity-60 text-white cursor-pointer text-center dark:bg-slate-600">
+    <span class="flex justify-center items-center text-sm">
+      <iconify-icon width="18" icon="ion:arrow-up-c" id="go-top"></iconify-icon>
+      <span id="scrollpercent"><span>0</span> %</span>
+    </span>
+  </div>
+  
+<script src="/blog/js/main.js"></script>
+
+
+  <script>
+    $(document).ready(function () {
+      const mapleCount = "10";
+      const speed = "0.5";
+      const mapleEl = document.getElementById("maple");
+      const maples = Array.from({ length: mapleCount }).map(() => {
+        const maple = document.createElement("div");
+        const scale = Math.random() * 0.5 + 0.5;
+        const offset = Math.random() * 2 - 1;
+        const x = Math.random() * mapleEl.clientWidth;
+        const y = -Math.random() * mapleEl.clientHeight;
+        const duration = 10 / speed;
+        const delay = -duration;
+        maple.className = "maple";
+        maple.style.width = `${24 * scale}px`;
+        maple.style.height = `${24 * scale}px`;
+        maple.style.left = `${x}px`;
+        maple.style.top = `${y}px`;
+        maple.style.setProperty("--maple-fall-offset", offset);
+        maple.style.setProperty("--maple-fall-height", `${Math.abs(y) + mapleEl.clientHeight}px`);
+        maple.style.animation = `fall ${duration}s linear infinite`;
+        maple.style.animationDelay = `${delay}s`;
+        mapleEl.appendChild(maple)
+        return maple
+      })
+    });
+  </script>
+  
+
+
+  <div class="fixed top-0 bottom-0 left-0 right-0 pointer-events-none print:hidden" id="maple"></div>
+</body>
+
+</html>
